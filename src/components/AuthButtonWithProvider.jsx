@@ -29,10 +29,16 @@ const AuthButtonWithProvider = ({ Icon, label, provider }) => {
           })
           .catch((err) => {
             console.log(`Error: ${err.Message}`);
-          })
+          });
         break;
       default:
-        console.log("Sign in with");
+        await signInWithRedirect(auth, googleAuthProvider)
+          .then((result) => {
+            console.log(result);
+          })
+          .catch((err) => {
+            console.log(`Error: ${err.Message}`);
+          });
         break;
     }
   };
