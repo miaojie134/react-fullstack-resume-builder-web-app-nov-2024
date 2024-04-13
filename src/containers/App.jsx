@@ -1,11 +1,16 @@
-import React from "react";
+import React, { Suspense } from "react";
+import { Route, Routes } from "react-router-dom";
+import { HomeScreen, Authentication } from "../pages";
 
 const App = () => {
-    return (
-        <div>
-            <h1>App</h1>
-        </div>
-    );
-}
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Routes>
+        <Route path="/*" element={<HomeScreen />} />
+        <Route path="/auth" element={<Authentication />} />
+      </Routes>
+    </Suspense>
+  );
+};
 
 export default App;
