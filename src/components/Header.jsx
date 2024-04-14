@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { Link } from "react-router-dom";
 import { Logo } from "../assets";
@@ -8,8 +8,11 @@ import useUser from "../hooks/useUser";
 import { PuffLoader } from "react-spinners";
 import { HiLogout } from "react-icons/hi";
 
+import slideUpDownMenu from "../animations";
+
 const Header = () => {
   const { data, isLoading, isError } = useUser();
+  const [isMenu, setIsMenu] = useState(false);
   return (
     <header
       className="w-full flex items-center justify-between px-4 py-3 
@@ -39,7 +42,10 @@ const Header = () => {
         ) : (
           <React.Fragment>
             {data ? (
-              <motion.div className="relative">
+              <motion.div
+                className="relative"
+                onClick={() => setIsMenu(!isMenu)}
+              >
                 {data?.photoURL ? (
                   <div className="w-12 h-12 rounded-md relative flex items-center justify-center">
                     <img
@@ -57,49 +63,59 @@ const Header = () => {
 
                 {/* dropdown menu */}
                 <AnimatePresence>
-                  <motion.div className="w-64 absolute bg-white px-4 py-3 right-0 top-14 flex flex-col items-center justify-center pt-12 gap-3 ">
-                    {data?.photoURL ? (
-                      <div className="w-20 h-20 rounded-md relative flex flex-col items-center justify-center">
-                        <img
-                          className="w-full h-full object-contain rounded-md"
-                          referrerPolicy="no-referrer"
-                          src={data?.photoURL}
-                          alt=""
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-12 h-12 rounded-md relative flex items-center justify-center bg-blue-700 shadow-md cursor-pointer">
-                        <p className="text-lg text-white">
-                          {data?.displayName[0]}
+                  {isMenu && (
+                    <motion.div
+                      {...slideUpDownMenu}
+                      className="w-64 absolute bg-white px-4 py-3 right-0 top-14 flex flex-col items-center justify-center pt-12 gap-3 rounded-md"
+                      onMouseLeave={() => {
+                        setIsMenu(!isMenu);
+                      }}
+                    >
+                      {data?.photoURL ? (
+                        <div className="w-20 h-20 rounded-md relative flex flex-col items-center justify-center">
+                          <img
+                            className="w-full h-full object-contain rounded-md"
+                            referrerPolicy="no-referrer"
+                            src={data?.photoURL}
+                            alt=""
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-md relative flex items-center justify-center bg-blue-700 shadow-md cursor-pointer">
+                          <p className="text-lg text-white">
+                            {data?.displayName[0]}
+                          </p>
+                        </div>
+                      )}
+                      {data?.displayName && (
+                        <p className="text-lg text-txtDark">
+                          {data?.displayName}
                         </p>
-                      </div>
-                    )}
-                    {data?.displayName && (
-                      <p className="text-lg text-txtDark">
-                        {data?.displayName}
-                      </p>
-                    )}
+                      )}
 
-                    {/* menu */}
-                    <div className="w-full flex flex-col items-start gap-3 pt-3">
-                      <Link
-                        className="text-txtLight hover:text-txtDark text-base whitespace-nowrap"
-                        to={"/profile"}
-                      >
-                        My Account 
-                      </Link>
-                      <Link
-                        className="text-txtLight hover:text-txtDark text-base whitespace-nowrap"
-                        to={"/template/create"}
-                      >
-                        Add New Template
-                      </Link>
-                      <div className="flex items-center gap-2 w-full px-2 py-2 border-t border-gray-300 justify-between group">
-                        <p className="text-txtLight group-hover:text-txtDark">Sign Out</p>
-                        <HiLogout className="group-hover:text-txtDark text-txtLight"/>
+                      {/* menu */}
+                      <div className="w-full flex flex-col items-start gap-3 pt-3">
+                        <Link
+                          className="text-txtLight hover:text-txtDark text-base whitespace-nowrap"
+                          to={"/profile"}
+                        >
+                          My Account
+                        </Link>
+                        <Link
+                          className="text-txtLight hover:text-txtDark text-base whitespace-nowrap"
+                          to={"/template/create"}
+                        >
+                          Add New Template
+                        </Link>
+                        <div className="flex items-center gap-2 w-full px-2 py-2 border-t border-gray-300 justify-between group">
+                          <p className="text-txtLight group-hover:text-txtDark">
+                            Sign Out
+                          </p>
+                          <HiLogout className="group-hover:text-txtDark text-txtLight" />
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </motion.div>
             ) : (
