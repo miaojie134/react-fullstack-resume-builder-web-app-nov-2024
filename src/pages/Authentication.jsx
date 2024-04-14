@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Logo } from "../assets";
 import { Footer } from "../containers";
-import { AuthButtonWithProvider } from "../components";
+import { AuthButtonWithProvider, MainSpinner } from "../components";
 import { FaGoogle, FaGithub } from "react-icons/fa6";
 
 import useUser from "../hooks/useUser";
@@ -16,6 +16,10 @@ const Authentication = () => {
       navigate("/", { replace: true });
     }
   }, [isLoading, data]);
+
+  if(isLoading) {
+    return <MainSpinner />
+  }
 
   return (
     <div className="auth-section">
