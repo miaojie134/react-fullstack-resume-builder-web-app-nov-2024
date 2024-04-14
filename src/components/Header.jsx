@@ -86,7 +86,7 @@ const Header = () => {
                         className="text-txtLight hover:text-txtDark text-base whitespace-nowrap"
                         to={"/profile"}
                       >
-                        My Account
+                        My Account 
                       </Link>
                       <Link
                         className="text-txtLight hover:text-txtDark text-base whitespace-nowrap"
