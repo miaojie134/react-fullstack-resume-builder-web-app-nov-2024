@@ -1,18 +1,29 @@
 import React, { useState } from "react";
-
 import { Link } from "react-router-dom";
+
 import { Logo } from "../assets";
 import { AnimatePresence, motion } from "framer-motion";
-
 import useUser from "../hooks/useUser";
 import { PuffLoader } from "react-spinners";
 import { HiLogout } from "react-icons/hi";
-
-import slideUpDownMenu from "../animations";
-
+import { slideUpDownMenu, FadeInOutWithOpacity } from "../animations";
+import { auth } from "../config/firebase.config";
+import { useQueryClient } from "react-query";
+import { toast } from "react-toastify";
 const Header = () => {
   const { data, isLoading, isError } = useUser();
   const [isMenu, setIsMenu] = useState(false);
+  const queryClient = useQueryClient();
+  const signOutUser = async () => {
+    await auth
+      .signOut()
+      .then(() => {
+        queryClient.setQueryData("user", null);
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      });
+  };
   return (
     <header
       className="w-full flex items-center justify-between px-4 py-3 
@@ -43,6 +54,7 @@ const Header = () => {
           <React.Fragment>
             {data ? (
               <motion.div
+                {...FadeInOutWithOpacity}
                 className="relative"
                 onClick={() => setIsMenu(!isMenu)}
               >
@@ -74,7 +86,7 @@ const Header = () => {
                       {data?.photoURL ? (
                         <div className="w-20 h-20 rounded-md relative flex flex-col items-center justify-center">
                           <img
-                            className="w-full h-full object-contain rounded-md"
+                            className="w-full h-full object-contain rounded-full"
                             referrerPolicy="no-referrer"
                             src={data?.photoURL}
                             alt=""
@@ -107,7 +119,12 @@ const Header = () => {
                         >
                           Add New Template
                         </Link>
-                        <div className="flex items-center gap-2 w-full px-2 py-2 border-t border-gray-300 justify-between group">
+                        <div
+                          className="flex items-center gap-2 w-full px-2 py-2 border-t border-gray-300 justify-between group"
+                          onClick={() => {
+                            signOutUser();
+                          }}
+                        >
                           <p className="text-txtLight group-hover:text-txtDark">
                             Sign Out
                           </p>
@@ -120,7 +137,13 @@ const Header = () => {
               </motion.div>
             ) : (
               <Link to={"/auth"}>
-                <motion.button>Login</motion.button>
+                <motion.button
+                  {...FadeInOutWithOpacity}
+                  className="px-4 py-2 border-gray-300 border rounded-md hover:shadow-md active:scale-95 duration-150"
+                  type="button"
+                >
+                  Login
+                </motion.button>
               </Link>
             )}
           </React.Fragment>
