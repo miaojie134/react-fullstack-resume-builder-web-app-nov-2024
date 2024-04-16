@@ -10,8 +10,9 @@ import { slideUpDownMenu, FadeInOutWithOpacity } from "../animations";
 import { auth } from "../config/firebase.config";
 import { useQueryClient } from "react-query";
 import { toast } from "react-toastify";
+import { adminIds } from "../utils/helpers";
 const Header = () => {
-  const { data, isLoading, isError } = useUser();
+  const { data, isLoading } = useUser();
   const [isMenu, setIsMenu] = useState(false);
   const queryClient = useQueryClient();
   const signOutUser = async () => {
@@ -113,12 +114,14 @@ const Header = () => {
                         >
                           My Account
                         </Link>
-                        <Link
-                          className="text-txtLight hover:text-txtDark text-base whitespace-nowrap"
-                          to={"/template/create"}
-                        >
-                          Add New Template
-                        </Link>
+                        {adminIds.includes(data?.uid) && (
+                          <Link
+                            className="text-txtLight hover:text-txtDark text-base whitespace-nowrap"
+                            to={"/template/create"}
+                          >
+                            Add New Template
+                          </Link>
+                        )}
                         <div
                           className="flex items-center gap-2 w-full px-2 py-2 border-t border-gray-300 justify-between group"
                           onClick={() => {
