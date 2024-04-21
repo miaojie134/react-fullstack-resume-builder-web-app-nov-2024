@@ -13,6 +13,5 @@ export const initialTags = [
   "Supply Chain Manager",
   "Network Administrator",
   "Database Administrator",
-  "Cybersecurity Specialist",
   "Full Stack Developer",
 ];

@@ -14,18 +14,17 @@ import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import useTemplate from "../hooks/useTemplate";
 
 const CreateTemplate = () => {
-  //
   const [formData, setFormData] = useState({
     title: "",
     imageURL: null,
   });
-  //
+
   const [imageAsset, setImageAsset] = useState({
     isImageLoading: false,
     uri: null,
     progress: 0,
   });
-  //
+
   const [selectedTags, setSelectedTags] = useState([]);
 
   const {
@@ -120,19 +119,21 @@ const CreateTemplate = () => {
       timestamp: timestamp,
     };
 
-    await setDoc(doc(db, "templates", id), _doc).then(() => {
-      setFormData((prev) => ({...prev, title: "", imageURL: null}));
-      setImageAsset((prev) =>({...prev, url: null}));
-      setSelectedTags([]);
-      templatesRefetch();
-      toast.success("Data push to the cloud");
-    }).catch((err) => toast.error(`Error: ${err.message}`));
+    await setDoc(doc(db, "templates", id), _doc)
+      .then(() => {
+        setFormData((prev) => ({ ...prev, title: "", imageURL: null }));
+        setImageAsset((prev) => ({ ...prev, uri: null }));
+        setSelectedTags([]);
+        templatesRefetch();
+        toast.success("Data push to the cloud");
+      })
+      .catch((err) => toast.error(`Error: ${err.message}`));
   };
 
   return (
     <div className="w-full px-4 lg:px-10 2xl:px-32 py-4 grid grid-cols-1 lg:grid-cols-12 gap-3">
       {/* left container */}
-      <div className="col-span-12 lg:col-span-4 2xl:col-span-3 flex flex-col items-center justify-center gap-3">
+      <div className="col-span-12 lg:col-span-5 2xl:col-span-5 flex flex-col items-center  gap-3">
         <div className="w-full">
           <p className="text-lg text-txtPrimary">Create a new Template</p>
         </div>
@@ -236,8 +237,39 @@ const CreateTemplate = () => {
       </div>
 
       {/* right container */}
-      <div className="col-span-12 lg:col-span-8 2xl:col-span-9 bg-purple-200">
-        2
+      <div className="col-span-12 lg:col-span-7 2xl:col-span-7 px-2 w-full flex-1 py-4">
+        {templatesIsLoading ? (
+          <React.Fragment>
+            <div className="w-full h-full flex items-center justify-center">
+              <PuffLoader size={40} color="#498FCD" />
+            </div>
+          </React.Fragment>
+        ) : (
+          <React.Fragment>
+            {templates && templates.length > 0 ? (
+              <React.Fragment>
+                <div className="w-full h-full grid gird-cols-1 lg:grid-cols-2 2xl:gird-cols-4 gap-4">
+                  {templates?.map((template) => (
+                    <div
+                      key={template?._id}
+                      className="w-full rounded-md overflow-hidden relative h-[500px]"
+                    >
+                      <img
+                        src={template?.imageURL}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <div>No Data</div>
+              </React.Fragment>
+            )}
+          </React.Fragment>
+        )}
       </div>
     </div>
   );
