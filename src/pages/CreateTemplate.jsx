@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import { FaUpload } from "react-icons/fa6";
+import { FaTrash, FaUpload } from "react-icons/fa6";
 import { PuffLoader } from "react-spinners";
 import { toast } from "react-toastify";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import { storage } from "../config/firebase.config";
 const CreateTemplate = () => {
   const [formData, setFormData] = useState({
@@ -21,9 +26,7 @@ const CreateTemplate = () => {
   };
 
   const handleFileSelect = (e) => {
-    setImageAsset((prev) => {
-      return { ...prev, isImageLoading: true };
-    });
+    setImageAsset((prev) => ({ ...prev, isImageLoading: true }));
     const file = e.target.files[0];
     if (file && isAllowed(file)) {
       const storageRef = ref(storage, `Templates/${Date.now()}-${file.name}`);
@@ -50,6 +53,7 @@ const CreateTemplate = () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
             setImageAsset((prev) => ({
               ...prev,
+              progress: 0,
               uri: downloadURL,
               isImageLoading: false,
             }));
@@ -65,6 +69,19 @@ const CreateTemplate = () => {
   const isAllowed = (file) => {
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
     return allowedTypes.includes(file.type);
+  };
+
+  const deleteAnImageObject = () => {
+    setImageAsset((prev) => ({ ...prev, isImageLoading: true }));
+    const deleteRef = ref(storage, imageAsset.uri);
+    deleteObject(deleteRef).then(() => {
+      setTimeout(() => {
+        setImageAsset((prev) => {
+          return { ...prev, progress: 0, uri: null, isImageLoading: false };
+        });
+      toast.success("Image removed");
+      }, 500);
+    });
   };
   return (
     <div className="w-full px-4 lg:px-10 2xl:px-32 py-4 grid grid-cols-1 lg:grid-cols-12">
@@ -94,7 +111,7 @@ const CreateTemplate = () => {
 
         {/* file uploader section */}
         <div
-          className="w-full bg-gray-100 h-[420px] backdrop-blur-md lg:h-[620px] 2xl:h-[740px] rounded-md
+          className="w-full bg-gray-100 h-[420px] lg:h-[620px] 2xl:h-[700px]  backdrop-blur-md  rounded-md
         border-2 border-dotted border-gray-300 cursor-pointer flex items-center justify-center flex-col"
         >
           {imageAsset.isImageLoading ? (
@@ -130,6 +147,13 @@ const CreateTemplate = () => {
                       loading="lazy"
                       alt=""
                     />
+
+                    <div
+                      className="absolute top-4 right-4 w-8 h-8 rounded-md flex items-center justify-center bg-red-500 cursor-pointer"
+                      onClick={deleteAnImageObject}
+                    >
+                      <FaTrash className="text-sm text-white" />
+                    </div>
                   </div>
                 </React.Fragment>
               )}
