@@ -8,17 +8,32 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
-import { storage } from "../config/firebase.config";
+import { db, storage } from "../config/firebase.config";
+import { initialTags } from "../utils/helpers";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import useTemplate from "../hooks/useTemplate";
+
 const CreateTemplate = () => {
+  //
   const [formData, setFormData] = useState({
     title: "",
     imageURL: null,
   });
+  //
   const [imageAsset, setImageAsset] = useState({
     isImageLoading: false,
     uri: null,
     progress: 0,
   });
+  //
+  const [selectedTags, setSelectedTags] = useState([]);
+
+  const {
+    data: templates,
+    isError: templatesIsError,
+    isLoading: templatesIsLoading,
+    refetch: templatesRefetch,
+  } = useTemplate();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -79,14 +94,45 @@ const CreateTemplate = () => {
         setImageAsset((prev) => {
           return { ...prev, progress: 0, uri: null, isImageLoading: false };
         });
-      toast.success("Image removed");
+        toast.success("Image removed");
       }, 500);
     });
   };
+
+  const handelSelectTags = (tag) => {
+    if (selectedTags.includes(tag)) {
+      setSelectedTags(selectedTags.filter((t) => t !== tag));
+    } else {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
+  const pushToCloud = async () => {
+    const timestamp = serverTimestamp();
+    const id = `${Date.now()}`;
+    const _doc = {
+      _id: id,
+      title: formData.title,
+      imageURL: imageAsset.uri,
+      tags: selectedTags,
+      name:
+        templates.length > 0 ? `Template${templates.length + 1}` : "Template1",
+      timestamp: timestamp,
+    };
+
+    await setDoc(doc(db, "templates", id), _doc).then(() => {
+      setFormData((prev) => ({...prev, title: "", imageURL: null}));
+      setImageAsset((prev) =>({...prev, url: null}));
+      setSelectedTags([]);
+      templatesRefetch();
+      toast.success("Data push to the cloud");
+    }).catch((err) => toast.error(`Error: ${err.message}`));
+  };
+
   return (
-    <div className="w-full px-4 lg:px-10 2xl:px-32 py-4 grid grid-cols-1 lg:grid-cols-12">
+    <div className="w-full px-4 lg:px-10 2xl:px-32 py-4 grid grid-cols-1 lg:grid-cols-12 gap-3">
       {/* left container */}
-      <div className="col-span-12 lg:col-span-4 2xl:col-span-3">
+      <div className="col-span-12 lg:col-span-4 2xl:col-span-3 flex flex-col items-center justify-center gap-3">
         <div className="w-full">
           <p className="text-lg text-txtPrimary">Create a new Template</p>
         </div>
@@ -96,7 +142,11 @@ const CreateTemplate = () => {
           <p className="text-base text-txtLight uppercase font-semibold">
             TempID:{""}
           </p>
-          <p className="text-sm text-txtDark capitalize">template1</p>
+          <p className="text-sm text-txtDark capitalize">
+            {templates && templates.length > 0
+              ? `Template${templates.length + 1}`
+              : "Template1"}
+          </p>
         </div>
 
         {/* template tile section */}
@@ -111,7 +161,7 @@ const CreateTemplate = () => {
 
         {/* file uploader section */}
         <div
-          className="w-full bg-gray-100 h-[420px] lg:h-[620px] 2xl:h-[700px]  backdrop-blur-md  rounded-md
+          className="w-full bg-gray-100 h-[420px]  2xl:h-[520px]  backdrop-blur-md  rounded-md
         border-2 border-dotted border-gray-300 cursor-pointer flex items-center justify-center flex-col"
         >
           {imageAsset.isImageLoading ? (
@@ -160,6 +210,29 @@ const CreateTemplate = () => {
             </React.Fragment>
           )}
         </div>
+
+        {/* tags */}
+        <div className="w-full flex items-center flex-wrap gap-2">
+          {initialTags.map((tag, index) => (
+            <div
+              key={index}
+              className={`border border-gray-200 rounded-md px-2 py-1 cursor-pointer ${
+                selectedTags.includes(tag) ? "bg-blue-500" : "bg-white"
+              }`}
+              onClick={() => handelSelectTags(tag)}
+            >
+              <p className="text-xs">{tag}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* button */}
+        <button
+          className="bg-blue-600 w-full text-white h-10 rounded-md active:scale-95 duration-300"
+          onClick={pushToCloud}
+        >
+          Save
+        </button>
       </div>
 
       {/* right container */}
