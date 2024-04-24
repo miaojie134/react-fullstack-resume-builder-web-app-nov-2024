@@ -10,7 +10,7 @@ import {
 } from "firebase/storage";
 import { db, storage } from "../config/firebase.config";
 import { initialTags } from "../utils/helpers";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { deleteDoc, doc, serverTimestamp, setDoc } from "firebase/firestore";
 import useTemplate from "../hooks/useTemplate";
 
 const CreateTemplate = () => {
@@ -88,6 +88,7 @@ const CreateTemplate = () => {
   const deleteAnImageObject = () => {
     setImageAsset((prev) => ({ ...prev, isImageLoading: true }));
     const deleteRef = ref(storage, imageAsset.uri);
+    console.log(deleteRef);
     deleteObject(deleteRef).then(() => {
       setTimeout(() => {
         setImageAsset((prev) => {
@@ -96,6 +97,7 @@ const CreateTemplate = () => {
         toast.success("Image removed");
       }, 500);
     });
+
   };
 
   const handelSelectTags = (tag) => {
@@ -128,6 +130,20 @@ const CreateTemplate = () => {
         toast.success("Data push to the cloud");
       })
       .catch((err) => toast.error(`Error: ${err.message}`));
+  };
+
+  const removeTemplate = async (template) => {
+    const deleteRef = ref(storage, template?.imageURL);
+    await deleteObject(deleteRef).then(async () => {
+      await deleteDoc(doc(db, "templates", template?._id))
+        .then(() => {
+          toast.success("Template deleted from the cloud");
+          templatesRefetch();
+        })
+        .catch((err) => {
+          toast.error(`Error: ${err.message}`);
+        });
+    });
   };
 
   return (
@@ -259,6 +275,13 @@ const CreateTemplate = () => {
                         alt=""
                         className="w-full h-full object-cover"
                       />
+                      {/* delete action */}
+                      <div
+                        className="absolute top-4 right-4 w-8 h-8 rounded-md flex items-center justify-center bg-red-500 cursor-pointer"
+                        onClick={() => removeTemplate(template)}
+                      >
+                        <FaTrash className="text-sm text-white" />
+                      </div>
                     </div>
                   ))}
                 </div>
