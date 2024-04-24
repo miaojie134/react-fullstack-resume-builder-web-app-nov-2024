@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaTrash, FaUpload } from "react-icons/fa6";
 import { PuffLoader } from "react-spinners";
 import { toast } from "react-toastify";
@@ -9,9 +10,10 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { db, storage } from "../config/firebase.config";
-import { initialTags } from "../utils/helpers";
+import { adminIds, initialTags } from "../utils/helpers";
 import { deleteDoc, doc, serverTimestamp, setDoc } from "firebase/firestore";
 import useTemplate from "../hooks/useTemplate";
+import useUser from "../hooks/useUser";
 
 const CreateTemplate = () => {
   const [formData, setFormData] = useState({
@@ -33,6 +35,10 @@ const CreateTemplate = () => {
     isLoading: templatesIsLoading,
     refetch: templatesRefetch,
   } = useTemplate();
+
+  const { data: user, isLoading} = useUser();
+
+  const navigate = useNavigate();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -97,7 +103,6 @@ const CreateTemplate = () => {
         toast.success("Image removed");
       }, 500);
     });
-
   };
 
   const handelSelectTags = (tag) => {
@@ -145,6 +150,15 @@ const CreateTemplate = () => {
         });
     });
   };
+
+  useEffect(() => {
+    console.log("chushihua");
+    console.log(user?.uid);
+    console.log(adminIds.includes(user?.uid));
+    if (!isLoading && !adminIds.includes(user?.uid)) {
+      navigate("/", { replace: true });
+    }
+  }, [user, isLoading, navigate]);
 
   return (
     <div className="w-full px-4 lg:px-10 2xl:px-32 py-4 grid grid-cols-1 lg:grid-cols-12 gap-3">
