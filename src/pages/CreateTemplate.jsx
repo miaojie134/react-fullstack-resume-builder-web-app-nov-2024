@@ -31,7 +31,7 @@ const CreateTemplate = () => {
 
   const {
     data: templates,
-    isError: templatesIsError,
+    // isError: templatesIsError,
     isLoading: templatesIsLoading,
     refetch: templatesRefetch,
   } = useTemplate();
