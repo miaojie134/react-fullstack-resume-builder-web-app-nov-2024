@@ -11,10 +11,14 @@ import { auth } from "../config/firebase.config";
 import { useQueryClient } from "react-query";
 import { toast } from "react-toastify";
 import { adminIds } from "../utils/helpers";
+import useFilters from "../hooks/useFilters";
 const Header = () => {
   const { data, isLoading } = useUser();
   const [isMenu, setIsMenu] = useState(false);
   const queryClient = useQueryClient();
+
+  const { data: filterData } = useFilters();
+
   const signOutUser = async () => {
     await auth
       .signOut()
@@ -24,6 +28,20 @@ const Header = () => {
       .catch((err) => {
         toast.error(err.message);
       });
+  };
+
+  const handleSearchTerm = (value) => {
+    queryClient.setQueryData("globalFilter", {
+      ...queryClient.getQueryData("globalFilter"),
+      searchTerm: value,
+    });
+  };
+
+  const clearFilter = () => {
+    queryClient.setQueryData("globalFilter", {
+      ...queryClient.getQueryData("globalFilter"),
+      searchTerm: "",
+    });
   };
   return (
     <header
@@ -41,10 +59,24 @@ const Header = () => {
       items-center justify-between bg-gray-200"
       >
         <input
+          value={filterData?.searchTerm ? filterData?.searchTerm : ""}
+          onChange={(e) => handleSearchTerm(e.target.value)}
           className="flex-1 h-10 bg-transparent text-base font-semibold outline-none border-none"
           type="text"
           placeholder="Search here..."
         />
+
+        <AnimatePresence>
+          {filterData?.searchTerm.length > 0 && (
+            <motion.div
+              onClick={clearFilter}
+              {...FadeInOutWithOpacity}
+              className="w-8 h-8 flex items-center justify-center bg-gray-300 rounded-md cursor-pointer active:scale-95 duration-150"
+            >
+              <p className="text-2xl text-black">X</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* profile section */}

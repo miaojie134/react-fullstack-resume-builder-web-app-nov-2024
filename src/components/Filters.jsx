@@ -9,7 +9,7 @@ import { useQueryClient } from "react-query";
 const Filters = () => {
   const [isClearHovered, setIsClearHovered] = useState(false);
 
-  const { data: filterData, isError, isLoading, refetch } = useFilters();
+  const { data: filterData } = useFilters();
 
   const queryClient = useQueryClient();
 
@@ -20,9 +20,16 @@ const Filters = () => {
     });
   };
 
+  const clearFilter = () => {
+    queryClient.setQueryData("globalFilter", {
+      ...queryClient.getQueryData("globalFilter"),
+      searchTerm: "",
+    });
+  };
   return (
     <div className="w-full flex items-center justify-start py-4">
       <div
+        onClick={clearFilter}
         className="border border-gray-300 rounded-md px-3 py-2 mr-2 cursor-pointer group hover:shadow-md bg-gray-200 relative"
         onMouseEnter={() => setIsClearHovered(true)}
         onMouseLeave={() => setIsClearHovered(false)}
